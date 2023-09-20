@@ -1,5 +1,6 @@
 package com.cst438.controllers;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,57 +54,56 @@ public class AssignmentController {
 		return result;
 	}
 	
+	
+	//create assignment
 	@PostMapping("/assignment")
-	public ResponseEntity<Assignment> createAssignment(@RequestBody AssignmentDTO assignmentDTO) {
-	    // Retrieve the course based on course ID
-	    Optional<Course> optionalCourse = courseRepository.findById(assignmentDTO.courseId());
-	    if (optionalCourse.isPresent()) {
-	        Course course = optionalCourse.get();
-	        Assignment newAssignment = new Assignment(assignmentDTO.assignmentName(), assignmentDTO.dueDate(), course);
-	        assignmentRepository.save(newAssignment);
-	        return new ResponseEntity<>(newAssignment, HttpStatus.CREATED);
-	    } else {
-	        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Course is not found");
-	    }
-	}
-	
-	@PutMapping("/assignment/{assignmentId}")
-	public ResponseEntity<Assignment> updateAssignment(
-	        @PathVariable int assignmentId,
-	        @RequestBody AssignmentDTO updatedAssignmentDTO) {
-	    Optional<Assignment> optionalAssignment = assignmentRepository.findById(assignmentId);
-	    if (optionalAssignment.isPresent()) {
-	        Assignment assignment = optionalAssignment.get();
-	        assignment.setName(updatedAssignmentDTO.assignmentName());
-	        assignment.setDueDate(updatedAssignmentDTO.dueDate());
-	        // Update other assignment properties as needed
-	        assignmentRepository.save(assignment);
-	        return new ResponseEntity<>(assignment, HttpStatus.OK);
-	    } else {
-	        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found");
-	    }
+	public void createAssignment(@RequestBody AssignmentDTO asDTO) {
+	   Assignment as = new Assignment();
+	    as.setName(asDTO.assignmentName());
+	    as.setDueDate(Date.valueOf(asDTO.dueDate()));
+	   
+	   Course course = courseRepository.findById(asDTO.courseId()).orElseThrow (
+			   () -> ResponseStatusException(HttpStatus.NOT_FOUND, "Course doesn't exist"));
+			   
+		as.setCourse(course);
+		assignmentRepository.save(as);
+			   
 	}
 	
 	
-	// Delete an assignment by ID
-    @DeleteMapping("/assignment/{assignmentId}")
-    public ResponseEntity<String> deleteAssignment(
-            @PathVariable int assignmentId,
-            @RequestParam(value = "force", required = false, defaultValue = "false") boolean force) {
-        Optional<Assignment> optionalAssignment = assignmentRepository.findById(assignmentId);
-        if (optionalAssignment.isPresent()) {
-            Assignment assignment = optionalAssignment.get();
-
-            // Check if the assignment has grades
-            if (!force && assignment.hasGrades()) {
-                return new ResponseEntity<>("Assignment has grades. Use force=true to delete.", HttpStatus.BAD_REQUEST);
-            }
-
-            assignmentRepository.delete(assignment);
-            return new ResponseEntity<>("The assignment is deleted successfully", HttpStatus.NO_CONTENT);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The assignment not found");
-        }
-    }
+	//update an assignment
+	@PutMapping("/assignment/{Id}")
+	public void updateAssignment(@PathVariable("id") int as_id, @RequestBody AssignmentDTO asDTO) {
+		 Assignment as = assignmentRepository.findById(as_id).orElseThrow (
+				   () -> ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment doesn't exist"));
+	    
+	    as.setName(asDTO.assignmentName());
+	    as.setDueDate(Date.valueOf(asDTO.dueDate()));
+	    
+	    Course course = courseRepository.findById(asDTO.courseId()).orElseThrow (
+				   () -> ResponseStatusException(HttpStatus.NOT_FOUND, "Course doesn't exist"));
+				   
+			as.setCourse(course);
+			assignmentRepository.save(as);
+	    
+	}
 	
+	
+	// delete an assignment
+    @DeleteMapping("/assignment/{assignment_id}")
+    public void updateAssignment(@PathVariable("assign_id") int as_id, @RequestParam ("force") Optional<String> force) {
+    	boolean hasForce = false;
+    	Assignment as = assignmentRepository.findById(as_id).orElseThrow (
+				   () -> ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment doesn't exist"));
+	    
+	    if(force.get().equals("true")) {
+	    	assignmentRepository.delete(as);
+	    	hasForce = true;
+	    
+    } else {
+    	assignmentRepository.findById(as_id).orElseThrow(
+    			() -> ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment has grades"));
+    };
+	
+}
 }

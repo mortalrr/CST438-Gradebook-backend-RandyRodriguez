@@ -26,22 +26,8 @@ public class Assignment {
 	private List<AssignmentGrade> assignmentGrades;
 	
 	private String name;
-	private String dueDate;
+	private Date dueDate;
 
-	
-	public Assignment(String assignmentName, String dueDate, Course course) {
-		this.name = assignmentName;
-		this.dueDate = dueDate;
-		this.course = course;
-	}
-
-	public List<AssignmentGrade> getAssignmentGrades() {
-        return assignmentGrades;
-    }
-
-    public boolean hasGrades() {
-        return assignmentGrades != null && !assignmentGrades.isEmpty();
-    }
 	
 	public int getId() {
 		return id;
@@ -55,11 +41,11 @@ public class Assignment {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getDueDate() {
+	public Date getDueDate() {
 		return dueDate;
 	}
-	public void setDueDate(String string) {
-		this.dueDate = string;
+	public void setDueDate(Date dueDate) {
+		this.dueDate = dueDate;
 	}
 	
 	public Course getCourse() {
