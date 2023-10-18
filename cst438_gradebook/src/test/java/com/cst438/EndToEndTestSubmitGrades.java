@@ -1,6 +1,8 @@
 package com.cst438;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -159,4 +161,112 @@ public class EndToEndTestSubmitGrades {
 		}
 
 	}
+	
+	 @Test
+	    public void testAddAssignment() throws Exception {
+		 System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
+			WebDriver driver = new ChromeDriver();
+			driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+			driver.get(URL);
+			Thread.sleep(SLEEP_DURATION);
+
+			try {
+				WebElement submit = driver.findElement(By.id("addAssignment"));
+				submit.click();
+				Thread.sleep(SLEEP_DURATION);
+
+				 	WebElement assignmentNameInput = driver.findElement(By.id("assignmentName"));
+		            WebElement dueDateInput = driver.findElement(By.id("dueDate"));
+		            WebElement addButton = driver.findElement(By.id("addButton"));
+
+		            assignmentNameInput.sendKeys(TEST_ASSIGNMENT_NAME);
+		            dueDateInput.sendKeys("2023-10-10");
+		            addButton.click();
+
+		            WebElement assignmentList = driver.findElement(By.id("assignmentList"));
+		            assertThat(assignmentList.getText()).contains(TEST_ASSIGNMENT_NAME);
+		        } finally {
+
+				driver.quit();
+			}
+	    }
+
+	    @Test
+	    public void testUpdateAssignment() throws Exception {
+	    	System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
+			WebDriver driver = new ChromeDriver();
+			driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+			driver.get(URL);
+			Thread.sleep(SLEEP_DURATION);
+
+			try {
+				List<WebElement> elements  = driver.findElements(By.xpath("//td"));
+				boolean found = false;
+
+				for (WebElement we : elements) {
+					if (we.getText().equals(TEST_ASSIGNMENT_NAME)) {
+						found=true;
+						driver.findElement(By.id("editAssignment0")).click();
+						break;
+					}
+				}
+				assertThat(found).withFailMessage("The test assignment was not found.").isTrue();
+
+				WebElement assignmentNameInput = driver.findElement(By.id("assignmentName"));
+				WebElement id = driver.findElement(By.id("id"));
+				WebElement dueDateInput = driver.findElement(By.id("dueDate"));
+				WebElement saveAssignment = driver.findElement(By.id("editAssignment"));
+				WebElement message = driver.findElement(By.id("message"));
+
+				assignmentNameInput.sendKeys(TEST_ASSIGNMENT_NAME);
+				id.sendKeys("1");
+				dueDateInput.sendKeys("2023-10-17");
+				Thread.sleep(SLEEP_DURATION);
+				saveAssignment.click();
+				Thread.sleep(SLEEP_DURATION);
+
+				assertEquals("Assignment changes saved. ", message.getText());
+
+				driver.navigate().back();
+				Thread.sleep(SLEEP_DURATION);
+				
+			} catch (Exception ex) {
+				throw ex;
+			} finally {
+
+				driver.quit();
+			}
+
+		}		
+
+	    @Test
+	    public void testDeleteAssignment() throws Exception {
+	    	System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
+			WebDriver driver = new ChromeDriver();
+			driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+			driver.get(URL);
+			Thread.sleep(SLEEP_DURATION);
+
+
+			try {
+				WebElement delete = driver.findElement(By.id("deleteOption1"));
+				WebElement msg = driver.findElement(By.id("message"));
+
+				delete.click();
+				Thread.sleep(SLEEP_DURATION);
+
+				assertEquals("Assignment Deleted. ", msg.getText());
+
+
+			} catch (Exception ex) {
+				throw ex;
+			} finally {
+
+				driver.quit();
+			}
+	    }
+	
 }
